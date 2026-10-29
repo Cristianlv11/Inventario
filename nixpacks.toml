@@ -1,8 +1,0 @@
-# El panel administrativo (React + Vite) se sirve desde panel/dist, que no esta en Git.
-# Railway lo compila en cada despliegue.
-[phases.setup]
-nixPkgs = ["...", "nodejs_22"]
-
-[phases.build]
-dependsOn = ["install"]
-cmds = ["cd panel && npm ci --no-audit --no-fund && npm run build"]

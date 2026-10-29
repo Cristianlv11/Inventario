@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist se versiona: Railway sirve el panel compilado (ver README de despliegue en el commit)
 dist-ssr
 *.local
 
