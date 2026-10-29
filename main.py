@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
@@ -63,7 +64,18 @@ app.mount("/pwa", StaticFiles(directory=pwa_dir, html=True), name="pwa")
 # Mount Panel (React Vite build)
 panel_dir = os.path.join(os.path.dirname(__file__), "panel", "dist")
 os.makedirs(panel_dir, exist_ok=True)
-app.mount("/panel", StaticFiles(directory=panel_dir, html=True), name="panel")
+class SPAStaticFiles(StaticFiles):
+    # Las rutas del panel (/panel/login, /panel/referencias...) las resuelve React:
+    # si no existe el archivo, se devuelve index.html para que recargar no de 404.
+    async def get_response(self, path, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as ex:
+            if ex.status_code == 404:
+                return await super().get_response("index.html", scope)
+            raise
+
+app.mount("/panel", SPAStaticFiles(directory=panel_dir, html=True), name="panel")
 
 @app.get("/health")
 def health_check():
